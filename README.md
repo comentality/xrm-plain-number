@@ -37,7 +37,16 @@ Started as a per-column "configure your own separator" control; refocused on
 
 ## Views
 
-Views are part of the same product but not built. What the research says:
+Built and verified 2026-09-09 as `PlainNumberGrid/` (see above). With the
+customizer assigned to Account and `cmtl_founded` added to "My Active Accounts",
+the Founded cell reads `2024` on the first load of a fresh session and every
+load after (`e2e/setup-grid.mjs`, `e2e/shoot-grid.mjs`; `node setup-grid.mjs
+restore` puts the table config and the view back). Rule: a column renders plain
+in grids exactly when it carries Plain Number on a main form of that table.
+Known limits: one customizer per table; cells rendered before the form query
+answers show the formatted value for a moment, then repaint.
+
+What the research said before building it:
 
 - The Power Apps grid control does not document rendering a column-bound field
   PCF per cell. Whether it does is untested; it is the first thing to try.
