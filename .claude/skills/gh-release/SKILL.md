@@ -10,11 +10,13 @@ Deviations from the default release flow.
   `e2e/package.json`. Only the package.json files carry `-dev`; manifests and
   Solution.xml cannot. Treat `PlainNumber/package.json` as the version source and
   keep the others in step.
-- **Artifacts.** `cd solution && dotnet build -c Release` produces
-  `solution/bin/Release/solution.zip` (unmanaged) and
-  `solution/bin/Release/solution_managed.zip`. Rename to
-  `xrm-plain-number-<version>.zip` and `xrm-plain-number-<version>-managed.zip`
-  before attaching. Both controls must appear in the zip under
+- **Artifacts.** `SolutionPackageType=Both` in the cdsproj does not emit two
+  zips with this toolchain; build each type explicitly, renaming in between:
+  `cd solution && dotnet build -c Release -p:SolutionPackageType=Managed` then
+  copy `bin/Release/solution.zip` to `xrm-plain-number-<version>-managed.zip`;
+  then `dotnet build -c Release -p:SolutionPackageType=Unmanaged` and copy to
+  `xrm-plain-number-<version>.zip`. Check `<Managed>` inside each zip's
+  `solution.xml` (1 managed, 0 unmanaged). Both controls must appear under
   `Controls/cmtl_KK.PlainNumber` and `Controls/cmtl_KK.PlainNumberGrid`.
 - **Notes.** Include: platform library React 16.14.0 and Fluent 9.46.2 are
   required by the environment (Fluent 9.68 is rejected); the grid customizer is
