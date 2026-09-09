@@ -4,6 +4,7 @@
 // the same profile dir, so no second login is needed until the session expires.
 import { chromium } from 'playwright';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const orgUrl = (process.env.ORG_URL ?? 'https://org7a56f694.crm3.dynamics.com').replace(/\/$/, '');
 
@@ -36,3 +37,4 @@ if (!ok) {
 console.log('Signed in; session persisted at', profileDir);
 await page.waitForTimeout(3000);
 await ctx.close();
+fs.writeFileSync(path.resolve('.auth/login-ok'), new Date().toISOString());
