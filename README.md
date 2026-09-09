@@ -1,5 +1,9 @@
 # xrm-number-format
 
+Model-driven app field control that shows a Whole Number with a thousands
+separator configured per column: the user's own, none, or any text.
+**[How to use it](docs/usage.md)**, with screenshots.
+
 ## Goal
 
 A PCF (PowerApps Component Framework) control that can display whole numbers in a
