@@ -55,9 +55,8 @@ rendering changes.
 
 A view cannot carry a field control on a column, so the same package ships a
 second control, **Plain Number Grid**, a customizer for the Power Apps grid
-control. It has no settings. It renders plain exactly the whole-number columns
-that carry Plain Number on one of the table's main forms, so the form is the one
-place where you decide.
+control. It has no settings and makes no network calls. Every whole-number
+column of the table it is assigned to renders without a thousands separator.
 
 ![Founded column shows 2024 in the view](img/grid-row.png)
 
@@ -72,8 +71,8 @@ To turn it on for a table:
    `<prefix>_KK.PlainNumberGrid`.
 5. Save and publish.
 
-Every view and subgrid of that table now shows Plain Number columns without a
-separator. Other whole-number columns on the table keep the user's format.
+Every view and subgrid of that table now shows all its whole-number columns
+without a separator. Decimal, currency and other types keep the user's format.
 Sorting and filtering are untouched; only the rendered text changes.
 
 Only one customizer can be assigned per table. If the table already has one,

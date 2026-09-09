@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="KK" constructor="PlainNumberGrid" version="0.1.0" display-name-key="Plain Number Grid" description-key="Grid customizer for the Power Apps grid control. Renders whole-number cells without a thousands separator on the columns that carry Plain Number on a form." control-type="virtual" >
+  <control namespace="KK" constructor="PlainNumberGrid" version="0.2.0" display-name-key="Plain Number Grid" description-key="Grid customizer for the Power Apps grid control. Renders every whole-number cell without a thousands separator." control-type="virtual" >
     <external-service-usage enabled="false">
     </external-service-usage>
     <property name="EventName" display-name-key="EventName" description-key="Set by the platform" of-type="SingleLine.Text" usage="bound" required="true" />
@@ -8,8 +8,5 @@
       <code path="index.ts" order="1"/>
       <platform-library name="React" version="16.14.0" />
     </resources>
-    <feature-usage>
-      <uses-feature name="WebAPI" required="true" />
-    </feature-usage>
   </control>
 </manifest>

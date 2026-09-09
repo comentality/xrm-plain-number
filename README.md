@@ -21,11 +21,10 @@ Started as a per-column "configure your own separator" control; refocused on
   Fluent 9.46.2), bound to `Whole.None`, editable, no inputs. Registered in the
   test env as `cmtl_KK.PlainNumber`.
 - `PlainNumberGrid/`: the view side (`KK.PlainNumberGrid`), a Power Apps grid
-  customizer. On init it queries main forms whose XML contains `KK.PlainNumber`,
-  maps table to columns, caches the map in sessionStorage, and overrides the
-  `Integer` cell renderer for those columns only. Assigned per table through the
-  Power Apps grid control's Customizer control property. Registered as
-  `cmtl_KK.PlainNumberGrid`.
+  customizer that overrides the `Integer` cell renderer with plain text for every
+  whole-number column of the table it is assigned to. No settings, no network
+  calls. Assigned per table through the Power Apps grid control's Customizer
+  control property. Registered as `cmtl_KK.PlainNumberGrid`.
 - `e2e/`: Playwright scripts. `harness-server.mjs` + `shoot-harness.mjs`
   screenshot the control in the PCF test harness. `run.mjs` waits for a sign-in
   in a headed browser, then creates a `cmtl_founded` column on Account, an
@@ -41,34 +40,19 @@ Built and verified 2026-09-09 as `PlainNumberGrid/` (see above). With the
 customizer assigned to Account and `cmtl_founded` added to "My Active Accounts",
 the Founded cell reads `2024` on the first load of a fresh session and every
 load after (`e2e/setup-grid.mjs`, `e2e/shoot-grid.mjs`; `node setup-grid.mjs
-restore` puts the table config and the view back). Rule: a column renders plain
-in grids exactly when it carries Plain Number on a main form of that table.
-Known limits: one customizer per table; cells rendered before the form query
-answers show the formatted value for a moment, then repaint; when the grid's
-table cannot be read from the context (not seen on list pages, subgrids on
-forms untested) the customizer falls back to matching the column's logical name
-across all tables that carry Plain Number; the plain cell's right alignment
-differs from the stock cell by a few pixels of padding. `e2e/shots/grid-backup.json`
-is the restore source for the demo state in the test env; keep it.
+restore` puts the table config and the view back). Rule, decided 2026-09-09:
+every whole-number column of the table renders plain. An earlier version
+rendered plain only the columns carrying Plain Number on a form, found by a
+form query at grid init (about 270 ms, off the critical path, cell repaint up to
+0.6 s after rows on the first grid of a session); it is in git history before
+commit "Grid customizer: all whole numbers plain" if that rule is wanted back.
+Known limits: one customizer per table; subgrids on forms untested; the plain
+cell's right alignment differs from the stock cell by a few pixels of padding.
+`e2e/shots/grid-backup.json` is the restore source for the demo state in the
+test env; keep it.
 
-Cost of the form query (`e2e/probe-timing.mjs`, 2026-09-09, headless Chromium,
-this env, one form carrying Plain Number, 9 loads of "My Active Accounts"):
-
-| Measure | Value |
-|---|---|
-| The query itself, from inside the page, 10 samples | 193 to 693 ms, median about 270 ms, 2.2 KB |
-| When it starts, relative to navigation start | 1.5 to 2.1 s, at grid init, alongside the grid's own data fetch |
-| Rows visible, all runs | 1.2 to 2.3 s; not waited on by the query |
-| Cell repaint to plain after rows, first grid of a session | 6 to 622 ms |
-| Later grids in the session (sessionStorage cache, 10 min) | no query |
-
-So the query is off the critical path: rows appear when they would anyway, and
-the year cell flips from `2,024` to `2024` up to ~0.6 s later on the first grid
-of a session. Payload grows with the number and size of forms that carry Plain
-Number, since the whole form XML comes back for each. A "without customizer"
-baseline could not be measured: after clearing the table config and publishing,
-the app kept loading the customizer, so the app metadata is cached beyond what a
-client-side cache clear reaches.
+The timing probe for that earlier version is `e2e/probe-timing.mjs`; its numbers
+are in the commit "README: measured cost of the customizer's form query".
 
 What the research said before building it:
 
