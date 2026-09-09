@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 0.1.0 - 2026-09-09
 
 - **Plain Number shows and edits a Whole Number column without a thousands separator, so a year reads 2024, not 2,024.**
