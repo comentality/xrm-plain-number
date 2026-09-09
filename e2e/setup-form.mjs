@@ -42,7 +42,6 @@ export async function setupForm(page) {
     `<row>${cell(2, 'No separator', ctrlId(2))}</row>` +
     `<row>${cell(3, `Emoji separator ${EMOJI}`, ctrlId(3))}</row>` +
     `</rows></section></sections></column></columns></tab></tabs>` +
-    `<header id="{0e2e7000-aaaa-4bbb-8ccc-000000000070}" celllabelposition="Top" columns="111" labelwidth="115" autoexpand="true"><rows><row></row></rows></header>` +
     `<controlDescriptions>${desc(2, 'none')}${desc(3, 'custom', EMOJI)}</controlDescriptions>` +
     `</form>`;
 

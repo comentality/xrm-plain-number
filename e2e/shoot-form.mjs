@@ -18,26 +18,29 @@ export async function shootForm(page, setup) {
     appId = pick.appmoduleid;
     out.app = pick.uniquename;
   }
-  const url = `${orgUrl}/main.aspx?appid=${appId}&pagetype=entityrecord&etn=account&id=${setup.accountId}&formid=${setup.formId}`;
-  out.url = url;
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-
+  const record = `pagetype=entityrecord&etn=account&id=${setup.accountId}&formid=${setup.formId}`;
+  const urls = [`${orgUrl}/main.aspx?appid=${appId}&${record}`, `${orgUrl}/main.aspx?${record}`];
   const value = page.locator('[data-testid="number-format-value"]');
   const errorDlg = page.locator('[data-id="errorDialog_subtitle"], [data-id="dialogSubtitle"], [data-id="errorDialogTitle"]');
-  await Promise.race([
-    value.first().waitFor({ state: 'visible', timeout: 120000 }),
-    errorDlg.first().waitFor({ state: 'visible', timeout: 120000 }),
-  ]).catch(() => {});
-  await page.waitForTimeout(3000);
-  const full = path.join(shotsDir, 'form-full.png');
-  await page.screenshot({ path: full });
-  out.shots.push(full);
-
-  if (await errorDlg.count()) {
-    out.error = (await errorDlg.first().innerText()).slice(0, 500);
+  out.attempts = [];
+  let n = 0;
+  for (const url of urls) {
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await Promise.race([
+      value.first().waitFor({ state: 'visible', timeout: 120000 }),
+      errorDlg.first().waitFor({ state: 'visible', timeout: 120000 }),
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
+    n = await value.count();
+    const attempt = { url, instances: n, finalUrl: page.url() };
+    if (await errorDlg.count()) attempt.error = (await errorDlg.first().innerText()).slice(0, 500);
+    out.attempts.push(attempt);
+    const full = path.join(shotsDir, `form-full-${out.attempts.length}.png`);
+    await page.screenshot({ path: full });
+    out.shots.push(full);
+    if (n > 0) break;
   }
-
-  const n = await value.count();
+  out.url = out.attempts[out.attempts.length - 1].url;
   out.instances = n;
   out.texts = [];
   for (let i = 0; i < n; i++) out.texts.push(await value.nth(i).inputValue());
