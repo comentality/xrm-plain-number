@@ -46,8 +46,11 @@ Views are part of the same product but not built. What the research says:
   and also hits currency. Nothing in the 2025 to 2026 release plans adds
   per-column number formatting to grids.
 
-Open decision: field PCF in grid (test), grid customizer (build), or formula
-column (document as the view-side recipe).
+Decided 2026-09-09: test the field PCF in the grid first. `e2e/run.mjs` binds
+Plain Number to `cmtl_founded` on an Account view and opens it with the default
+grid; the screenshot and the rendered text decide. If the grid ignores it, the
+next shape is a grid customizer in the same solution. The formula column stays a
+documented fallback only.
 
 ## Gotchas met
 
