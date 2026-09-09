@@ -51,6 +51,25 @@ across all tables that carry Plain Number; the plain cell's right alignment
 differs from the stock cell by a few pixels of padding. `e2e/shots/grid-backup.json`
 is the restore source for the demo state in the test env; keep it.
 
+Cost of the form query (`e2e/probe-timing.mjs`, 2026-09-09, headless Chromium,
+this env, one form carrying Plain Number, 9 loads of "My Active Accounts"):
+
+| Measure | Value |
+|---|---|
+| The query itself, from inside the page, 10 samples | 193 to 693 ms, median about 270 ms, 2.2 KB |
+| When it starts, relative to navigation start | 1.5 to 2.1 s, at grid init, alongside the grid's own data fetch |
+| Rows visible, all runs | 1.2 to 2.3 s; not waited on by the query |
+| Cell repaint to plain after rows, first grid of a session | 6 to 622 ms |
+| Later grids in the session (sessionStorage cache, 10 min) | no query |
+
+So the query is off the critical path: rows appear when they would anyway, and
+the year cell flips from `2,024` to `2024` up to ~0.6 s later on the first grid
+of a session. Payload grows with the number and size of forms that carry Plain
+Number, since the whole form XML comes back for each. A "without customizer"
+baseline could not be measured: after clearing the table config and publishing,
+the app kept loading the customizer, so the app metadata is cached beyond what a
+client-side cache clear reaches.
+
 What the research said before building it:
 
 - The Power Apps grid control does not document rendering a column-bound field
