@@ -44,7 +44,12 @@ load after (`e2e/setup-grid.mjs`, `e2e/shoot-grid.mjs`; `node setup-grid.mjs
 restore` puts the table config and the view back). Rule: a column renders plain
 in grids exactly when it carries Plain Number on a main form of that table.
 Known limits: one customizer per table; cells rendered before the form query
-answers show the formatted value for a moment, then repaint.
+answers show the formatted value for a moment, then repaint; when the grid's
+table cannot be read from the context (not seen on list pages, subgrids on
+forms untested) the customizer falls back to matching the column's logical name
+across all tables that carry Plain Number; the plain cell's right alignment
+differs from the stock cell by a few pixels of padding. `e2e/shots/grid-backup.json`
+is the restore source for the demo state in the test env; keep it.
 
 What the research said before building it:
 

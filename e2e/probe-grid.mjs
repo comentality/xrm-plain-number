@@ -1,3 +1,6 @@
+// PROBE, run on 2026-09-09 with ids from the test env. Result: customizer works;
+// first paint showed the formatted value until the column list loaded, fixed by
+// PendingCell. Kept as evidence, not tooling.
 import { openOrg, orgUrl } from './browser.mjs';
 const url = `${orgUrl}/main.aspx?appid=63bd689b-2995-f111-b8db-70a8a50f575d&pagetype=entitylist&etn=account&viewid=%7b00000000-0000-0000-00aa-000010001001%7d&viewtype=1039`;
 const { ctx, page } = await openOrg({ headless: true });
