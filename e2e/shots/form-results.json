@@ -1,0 +1,67 @@
+{
+  "setup": {
+    "ctrlName": "cmtl_KK.PlainNumber",
+    "formId": "0e2e0003-aaaa-4bbb-8ccc-000000000003",
+    "accountId": "11a96a37-5cac-f111-b374-7ced8da4bb78",
+    "column": "cmtl_founded",
+    "value": 2024
+  },
+  "form": {
+    "shots": [
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-full-1.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-display.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-display-plain.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-display-stock.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-edited.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-edited-plain.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\form-edited-stock.png"
+    ],
+    "app": "PowerPlatformEnvironmentSettings",
+    "attempts": [
+      {
+        "url": "https://org7a56f694.crm3.dynamics.com/main.aspx?appid=63bd689b-2995-f111-b8db-70a8a50f575d&pagetype=entityrecord&etn=account&id=11a96a37-5cac-f111-b374-7ced8da4bb78&formid=0e2e0003-aaaa-4bbb-8ccc-000000000003",
+        "instances": 1,
+        "finalUrl": "https://org7a56f694.crm3.dynamics.com/main.aspx?appid=63bd689b-2995-f111-b8db-70a8a50f575d&pagetype=entityrecord&etn=account&id=11a96a37-5cac-f111-b374-7ced8da4bb78&formid=0e2e0003-aaaa-4bbb-8ccc-000000000003"
+      }
+    ],
+    "url": "https://org7a56f694.crm3.dynamics.com/main.aspx?appid=63bd689b-2995-f111-b8db-70a8a50f575d&pagetype=entityrecord&etn=account&id=11a96a37-5cac-f111-b374-7ced8da4bb78&formid=0e2e0003-aaaa-4bbb-8ccc-000000000003",
+    "instances": 1,
+    "display": {
+      "plain": "2024",
+      "stock": "2,024"
+    },
+    "afterEdit": {
+      "plain": "1999",
+      "stock": "1,999"
+    }
+  },
+  "viewSetup": {
+    "viewId": "0e2e0004-aaaa-4bbb-8ccc-000000000004"
+  },
+  "view": {
+    "shots": [
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\view-full-1.png",
+      "C:\\Users\\kk\\Code\\xrm-plain-number\\e2e\\shots\\view-row.png"
+    ],
+    "attempts": [
+      {
+        "url": "https://org7a56f694.crm3.dynamics.com/main.aspx?appid=63bd689b-2995-f111-b8db-70a8a50f575d&pagetype=entitylist&etn=account&viewid=%7b0e2e0004-aaaa-4bbb-8ccc-000000000004%7d&viewtype=1039",
+        "rowFound": true,
+        "finalUrl": "https://org7a56f694.crm3.dynamics.com/main.aspx?appid=63bd689b-2995-f111-b8db-70a8a50f575d&pagetype=entitylist&etn=account&viewid=00000000-0000-0000-00aa-000010001001&viewType=1039"
+      }
+    ],
+    "rowText": " Plain Number E2E Co",
+    "cellTexts": [
+      "",
+      "Plain Number E2E Co",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "plainNumberInGrid": 0,
+    "gridKind": [
+      "[data-lp-id*=\"PowerAppsOneGrid\"]"
+    ]
+  }
+}

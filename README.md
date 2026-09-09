@@ -46,11 +46,16 @@ Views are part of the same product but not built. What the research says:
   and also hits currency. Nothing in the 2025 to 2026 release plans adds
   per-column number formatting to grids.
 
-Decided 2026-09-09: test the field PCF in the grid first. `e2e/run.mjs` binds
-Plain Number to `cmtl_founded` on an Account view and opens it with the default
-grid; the screenshot and the rendered text decide. If the grid ignores it, the
-next shape is a grid customizer in the same solution. The formula column stays a
-documented fallback only.
+Tested 2026-09-09 (`e2e/probe-view-column-control.mjs`): a field PCF cannot be
+bound to a view column. Creating a savedquery with `grid/controlDescriptions`
+`forControl="cmtl_founded"` is accepted on POST but the view never opens (the
+app falls back to the default view), and PATCHing the same XML onto the default
+Account view is rejected by the server: "Property cmtl_founded is bound to an
+attribute in non-existent entity". Views only know dataset-level controls. So
+the view side is a **grid customizer control** in the same solution, or
+nothing. Open product question: with no configuration, which whole-number
+columns does the customizer render plain? All of them on the table it is
+assigned to, or only some by a naming rule.
 
 ## Gotchas met
 

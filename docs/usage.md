@@ -4,12 +4,18 @@ A field control for model-driven apps that shows a Whole Number column without
 a thousands separator. Made for years: a column that holds `2024` should read
 2024, not 2,024. No configuration.
 
-| | Stock Whole Number control | Plain Number |
-|---|---|---|
-| Founded = 2024 | `2,024` | ![2024 shown plain](img/harness-display.png) |
+The same column, Founded = 2024, on one form with the stock control and with
+Plain Number:
+
+![stock control shows 2,024, Plain Number shows 2024](img/form-display.png)
 
 Users can type into it. Whatever they type, digits are kept and everything else
-is dropped, so `1,999`, `1 999` and `1999` all commit as 1999:
+is dropped, so `1,999`, `1 999` and `1999` all commit as 1999. After typing 1999
+into Plain Number and pressing Enter, the stock control on the same form follows:
+
+![after edit: stock control 1,999, Plain Number 1999](img/form-edited.png)
+
+In the PCF test harness, mid-typing and after commit:
 
 | While typing | After Enter or leaving the field |
 |---|---|
@@ -47,8 +53,10 @@ rendering changes.
 
 ## Views
 
-Not covered yet. In a view the platform still renders the column with the
-user's digit grouping. See the root README for where that discussion stands.
+Not covered by this control. Dataverse views cannot carry a field control on a
+column: the server rejects it ("bound to an attribute in non-existent entity"),
+so in a view the column still renders with the user's digit grouping. A
+view-side answer needs a grid customizer control; see the root README.
 
 ## Build from source
 
