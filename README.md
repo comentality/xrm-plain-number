@@ -166,7 +166,24 @@ subgrids, both in one solution and both reading the same per-column format spec 
 one place. Run the field-PCF-in-grid test first; if the Power Apps grid renders a
 column-bound field PCF, the customizer may not be needed at all.
 
-## Status
+## Status (2026-09-09)
 
-Empty, nothing built yet. Research above is from web sources; nothing was installed
-or run.
+- `NumberFormat/` is a working field PCF (`cmtl_KK.NumberFormat`, virtual, React 16 +
+  Fluent 9.46.2), bound to `Whole.None`, display only. Inputs: `separatorMode`
+  (user | none | custom) and `groupSeparator` (any text). Pushed to the test env with
+  `pac pcf push --publisher-prefix cmtl`.
+- Harness screenshots for 1234567 in `e2e/shots/keep/`: user separator, none, and
+  the pizza emoji. Reproduce with `node harness-server.mjs` then
+  `node shoot-harness.mjs` in `e2e/`.
+- Env e2e: `node run.mjs` in `e2e/` opens a headed browser, waits for a sign-in,
+  creates the Account main form "Number Format E2E" (stock control, no separator,
+  emoji separator, all on `numberofemployees`), publishes, sets the test account to
+  1234567, and screenshots into `e2e/shots/`. Web API writes go through the signed-in
+  page, so no secrets are stored.
+- Not done: the view side, and the field-PCF-in-grid test.
+
+## Gotchas met
+
+- `pac pcf init` pins Fluent 9.68.0; the env rejects it. 9.46.2 imports.
+- No apostrophes in manifest `description-key` values (XSD `noAposStringType`).
+- `pac pcf push` piped through grep or tail exits 0 even when the import failed.
