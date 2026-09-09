@@ -8,3 +8,4 @@ bin/
 *.zip
 e2e/shots/*.png
 !e2e/shots/keep/
+e2e/harness.log
