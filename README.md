@@ -13,9 +13,11 @@ Two things follow from that sentence and should not be lost:
 - **Per column.** The format is a property of the column the control is bound to, not
   of the control globally. Two Whole Number columns on the same form or view can show
   differently.
-- **View and form.** One control (or one package) has to work as a field control on a
-  form and as a cell renderer in a view/grid. Those are different PCF surfaces with
-  different manifests and lifecycles; "works on the form" alone is not done.
+- **View and form.** One package has to work as a field control on a form and change
+  how a cell renders in a view. Those are different PCF surfaces with different
+  manifests and lifecycles; "works on the form" alone is not done. Prior art (below)
+  says the view side is most likely a grid customizer control, not a dataset control
+  that replaces the whole grid.
 
 ## Open questions
 
@@ -24,29 +26,147 @@ Decided on purpose in the first working session, not by drift:
 - **What "format" means.** Thousands separators on/off? Padding to a fixed width
   (leading zeros)? Prefix/suffix (units, `#`)? Custom digit grouping? Locale-aware vs
   a fixed pattern string? Pick the vocabulary before the manifest, since the manifest
-  freezes the property names.
-- **Where the per-column configuration lives.** PCF input properties set when the
-  control is added to the column (the obvious answer), vs reading something off the
-  column metadata, vs a lookup table. The first is simplest and is what "configured per
-  column" most likely means.
+  freezes the property names. Note the platform hands a PCF the user's digit-grouping
+  settings via `context.userSettings.numberFormattingInfo`, so "honour user settings"
+  and "ignore them for this column" are both possible.
+- **Where the per-column configuration lives.** This is harder than it looks: the grid
+  customizer control has exactly one manifest property (`EventName`) and no
+  maker-editable inputs, so form-side input properties alone cannot carry the format
+  to views. Options: an environment-variable JSON keyed by entity and column logical
+  name (both controls read it); a config table (the yopower approach); form-side input
+  properties as an override on top of either. Decide one source of truth first.
 - **Form control shape.** Read-only display only, or also editable (accept typed input,
   strip formatting, write back the integer)? "Display" in the ask suggests read-only,
   but a form field that cannot be edited surprises users.
-- **View control shape.** PCF for views is a dataset control that owns the whole grid,
-  not a per-cell renderer. Confirm whether "in view" means a custom grid control or
-  whether a field-type control bound to the column is enough on the newer grid. This is
-  the biggest scope fork in the project.
+- **View control shape, and the first empirical test.** Nobody, Microsoft included,
+  documents whether a field-type PCF bound to a view column renders per cell inside
+  the Power Apps grid control. The two grids that would have honoured one (Editable
+  Grid, Power Apps Read-Only Grid) were deprecated March 2026. First thing to do in a
+  real environment: bind a trivial field PCF to a Whole Number column on a view using
+  the Power Apps grid control and see whether it renders. If it does, the view side
+  is nearly free. If not, the view side is a grid customizer overriding the `Integer`
+  cell renderer (and cell editor, on editable grids), targeting columns by
+  `colDefs[columnIndex].name`. A dataset PCF replacing the whole view is ruled out:
+  it costs infinite scroll, grouping, aggregation, editing and nested grids to change
+  one column's text.
 - **How anyone knows it worked.** A test harness run (`npm start`) with sample values,
-  plus a solution import into a real environment with a Whole Number column on a form
-  and a view.
+  then a solution import into a real environment with a Whole Number column on a form,
+  a view using the Power Apps grid control, and a subgrid on a form.
 
-## Leads (unverified, evaluate before using)
+## Constraints surfaced by the research
 
-- The `pac pcf init` template and the PCF test harness are the standard starting point.
-  Not run here.
-- The `xrm-*` siblings in `~/Code` are Dynamics/XrmToolBox tools, not PCF controls; they
-  are neighbours by domain, not by toolchain.
+- **One customizer per grid.** If the target table already has a grid customizer
+  assigned (yopower or anything else), this control cannot coexist without merging.
+- **Renderers are display only.** Microsoft: "Don't use renderers to override the
+  values in the grid since the server doesn't use the new values to do filtering or
+  sorting." Sort and filter stay on the raw integer.
+- **`colDefs[].customizerParams` is undocumented** and platform-populated. Do not rely
+  on it as the per-column config channel.
+- **Customizer assignment is classic solution explorer only** (table > Controls > Power
+  Apps grid control > Customizer control), no modern designer path.
+- **Reading an environment variable from the customizer** likely needs
+  `<uses-feature name="WebAPI">` in the manifest, which Microsoft's template does not
+  declare. Unverified.
+- **Licence hygiene.** Microsoft samples are MIT. The yopower repo is GPL-3.0; do not
+  copy code from it.
+
+## Prior art (researched 2026-09-09, nothing run)
+
+### Existing PCF controls
+
+Nothing found that exposes a format pattern, digit-grouping toggle, zero-padding
+width or locale as a manifest input for `Whole.None`. Closest:
+
+- **Prefix Suffix TextField**, Danish Naglekar. Field control, binds `Whole.None`;
+  inputs `displayOption`, `prefixValue`, `suffixValue`. Glues text around the raw
+  value, never touches digits. Editable, MIT, last commit 2022-08.
+  https://pcf.gallery/prefix-suffix-textfield/ ·
+  https://github.com/Power-Maverick/PCF-Controls/tree/master/PrefixSuffixTextFieldControl
+- **Comprehensive Prefix Suffix PCF**, Oliver Denness. Field control, `Whole.None`
+  plus others; prefix/suffix, icons, colours, regex validation. No digit formatting.
+  MIT, 2025-08, still alpha. https://github.com/odenness/oden-prefixsuffix-pcf
+- **Prefix Suffix Control**, Ivan Ficko. Suffix only, MIT, last commit 2019.
+  https://github.com/DynamicsNinja/PCF-Prefix-Suffix-Control
+- **Configurable Field Formatter Control**, Prateek Chauhan. Field control, JSON
+  rules, but rules change text colour only. Read-only, MIT, 2026-08.
+  https://github.com/chauhanprateek92/ConfigurableFieldFormatterControl
+- **Power Apps Grid Extensions**, yopower. A grid customizer with 18 sub-customizers
+  configured from a JSON column on its own Column Definition table (its workaround for
+  customizers having no per-instance parameters). Numeric ones do colours, progress
+  bar, duration. No format-string customizer. GPL-3.0, active 2026-09. Views and
+  subgrids only, not forms. https://pcf.gallery/power-apps-grid-extensions/ ·
+  https://github.com/yopowerrepos/freemium
+- **RecordImage Cell Renderer**, David Rivard. Customizer for images; its blog post
+  documents the no-per-instance-parameters constraint and shows it working in a form
+  subgrid. MIT. https://github.com/drivardxrm/RecordImage.CellRenderer
+- Percent-format, truncated-number and phone-format controls exist but bind Decimal or
+  text, not `Whole.None`.
+
+### What the platform already does
+
+- **Whole Number `Format`** is None / Duration / Time Zone / Language (plus API-only
+  Locale). It picks a control, it is not a display mask. No per-column separator,
+  padding or prefix setting exists.
+  https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-edit-field-portal ·
+  https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/reference/integerformat
+- **Digit grouping is per user** (Personalization Settings > Formats > Number). The org
+  setting only seeds new users. It hits every number the user sees, currency included.
+  https://learn.microsoft.com/en-us/power-apps/user/set-personal-options
+- **Formula (fx) column** of type Text: `Text(n, "#")` gives an unseparated digit
+  string and can concatenate a prefix. Locale tokens (`,` `.`) unsupported; zero
+  padding unverified; sortability documented inconsistently; filtering throttled; a
+  second read-only column beside the editable one.
+  https://learn.microsoft.com/en-us/power-apps/maker/data-platform/formula-columns
+- **Classic calculated column** has no number-to-text function at all.
+- **Canvas / custom page `Text()`** supports `0`, `#`, `,`, locale tags. Only helps if
+  leaving native model-driven views and forms is acceptable.
+  https://learn.microsoft.com/en-us/power-platform/power-fx/reference/function-text
+- **Release plans 2025w1 through 2026w1** list nothing on per-column number
+  formatting in model-driven grids. Release plans moved to the "AI at Work roadmap" in
+  September 2026, which was **not checked**. A feature landing there would make this
+  project moot.
+
+### How a PCF reaches a view cell
+
+- **Power Apps grid control** is the current grid; Editable Grid and Power Apps
+  Read-Only Grid deprecated effective March 2026, no removal date.
+  https://learn.microsoft.com/en-us/power-platform/important-changes-coming#deprecation-of-editable-grid-and-power-apps-read-only-grid-controls
+- **Customizer control**: a `virtual` PCF with one bound property `EventName`; in
+  `init` it calls `context.factory.fireEvent(eventName, { cellRendererOverrides,
+  cellEditorOverrides })`. Overrides are keyed by data type; `Integer` is the whole
+  number key. Return null to fall back to the stock renderer. The doc is titled
+  "Customize the editable grid control" but is the Power Apps grid control API.
+  https://learn.microsoft.com/en-us/power-apps/developer/component-framework/customize-editable-grid-control ·
+  https://learn.microsoft.com/en-us/power-apps/developer/component-framework/sample-controls/customized-editable-grid-control ·
+  https://github.com/microsoft/PowerApps-Samples/tree/master/component-framework/PowerAppsGridCustomizerControl ·
+  https://github.com/microsoft/PowerApps-Samples/tree/master/component-framework/resources/GridCustomizerControlTemplate
+- **Targeting one column**: `params.colDefs[params.columnIndex].name === 'creditlimit'`
+  in the official sample. `props` carries `value`, `formattedValue`, `columnDataType`.
+- **Getting `context.formatting` into a renderer**: build the overrides in a closure
+  over `context` inside `init`. Formatting API has `formatInteger`.
+  https://learn.microsoft.com/en-us/power-apps/developer/component-framework/reference/formatting ·
+  https://nordicsummit.info/wp-content/uploads/2023/10/Diana_Birkelbach_CodeComponentsForPowerAppsGrid.pdf
+- **Per-column config from outside the control**: environment-variable JSON read via
+  webAPI (Temmy Raharjo), or entity metadata (itmustbecode).
+  https://temmyraharjo.wordpress.com/2023/07/29/build-pcf-make-specified-attributes-readonly-on-power-apps-grid-control/ ·
+  https://itmustbecode.com/powerapps-grid-control-how-to-make-cell-renderers-more-generic/ ·
+  https://dianabirkelbach.wordpress.com/2022/07/27/power-apps-grid-control-first-glimpse-to-the-cell-renderer-and-editors/
+- **Subgrids on forms** use the same control and the same Customizer control property.
+  https://dianabirkelbach.wordpress.com/2023/07/15/disable-cells-using-power-apps-grid-customizer-control/
+- **Two controls in one solution**: one `.pcfproj` each, both referenced from one
+  `.cdsproj` via `pac solution add-reference`. A shared `formatWholeNumber(value,
+  spec)` module can serve both.
+  https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution#pac-solution-add-reference
+
+### Recommended shape (research only, untested)
+
+A field PCF bound to `Whole.None` for forms, plus a grid customizer PCF overriding the
+`Integer` cell renderer (and editor, when the grid is editable) for views and
+subgrids, both in one solution and both reading the same per-column format spec from
+one place. Run the field-PCF-in-grid test first; if the Power Apps grid renders a
+column-bound field PCF, the customizer may not be needed at all.
 
 ## Status
 
-Empty, nothing built yet.
+Empty, nothing built yet. Research above is from web sources; nothing was installed
+or run.
