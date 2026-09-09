@@ -1,60 +1,77 @@
 // Opens the e2e form on the test account and screenshots the three
-// employee-count cells (full section plus a tight crop per cell).
-// Usage: node shoot-form.mjs '<json from setup-form.mjs>'  (or env SETUP_JSON)
+// employee-count cells (full page, section, and a tight crop per cell).
 import fs from 'node:fs';
 import path from 'node:path';
 import { openOrg, webApi, orgUrl, shotsDir } from './browser.mjs';
 
-const setup = JSON.parse(process.argv[2] ?? process.env.SETUP_JSON ?? '{}');
-if (!setup.formId || !setup.accountId) throw new Error('need formId and accountId from setup-form.mjs');
-fs.mkdirSync(shotsDir, { recursive: true });
+export async function shootForm(page, setup) {
+  fs.mkdirSync(shotsDir, { recursive: true });
+  const out = { shots: [] };
 
-const { ctx, page } = await openOrg({ headless: true });
-try {
-  // Any app that opens account records will do; prefer one the env has.
   let appId = process.env.APP_ID;
   if (!appId) {
     const apps = await webApi(page, 'GET', `appmodules?$select=appmoduleid,uniquename&$filter=statecode eq 0`);
-    const pick = apps.data.value.find((a) => /NumberFormat/i.test(a.uniquename)) ?? apps.data.value.find((a) => /EnvironmentSettings/i.test(a.uniquename)) ?? apps.data.value[0];
+    const pick =
+      apps.data.value.find((a) => /NumberFormat/i.test(a.uniquename)) ??
+      apps.data.value.find((a) => /EnvironmentSettings/i.test(a.uniquename)) ??
+      apps.data.value[0];
     appId = pick.appmoduleid;
-    console.log('using app', pick.uniquename);
+    out.app = pick.uniquename;
   }
   const url = `${orgUrl}/main.aspx?appid=${appId}&pagetype=entityrecord&etn=account&id=${setup.accountId}&formid=${setup.formId}`;
+  out.url = url;
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  // Wait for the form to render our control, or for an error dialog.
   const value = page.locator('[data-testid="number-format-value"]');
+  const errorDlg = page.locator('[data-id="errorDialog_subtitle"], [data-id="dialogSubtitle"], [data-id="errorDialogTitle"]');
   await Promise.race([
-    value.first().waitFor({ state: 'visible', timeout: 90000 }),
-    page.locator('[data-id="errorDialog_subtitle"], [data-id="dialogSubtitle"]').first().waitFor({ state: 'visible', timeout: 90000 }),
-  ]);
-  await page.waitForTimeout(2500);
-  await page.screenshot({ path: path.join(shotsDir, 'form-full.png') });
+    value.first().waitFor({ state: 'visible', timeout: 120000 }),
+    errorDlg.first().waitFor({ state: 'visible', timeout: 120000 }),
+  ]).catch(() => {});
+  await page.waitForTimeout(3000);
+  const full = path.join(shotsDir, 'form-full.png');
+  await page.screenshot({ path: full });
+  out.shots.push(full);
+
+  if (await errorDlg.count()) {
+    out.error = (await errorDlg.first().innerText()).slice(0, 500);
+  }
 
   const n = await value.count();
-  console.log('NumberFormat instances rendered:', n);
-  const texts = [];
-  for (let i = 0; i < n; i++) texts.push(await value.nth(i).inputValue());
-  console.log('rendered texts:', JSON.stringify(texts));
+  out.instances = n;
+  out.texts = [];
+  for (let i = 0; i < n; i++) out.texts.push(await value.nth(i).inputValue());
 
-  // Section crop: the container that holds all three rows.
-  const section = page.locator('section, [data-id^="numbers"], [role="region"]').filter({ has: value.first() }).first();
-  if (await section.count()) await section.screenshot({ path: path.join(shotsDir, 'form-section.png') });
+  const fieldContainer = (loc) => loc.locator('xpath=ancestor::*[@data-id][contains(@data-id, "FieldSectionItemContainer")][1]');
 
-  // Per-cell crops: the field container (label + control) around each instance.
-  for (let i = 0; i < n; i++) {
-    const cell = value.nth(i).locator('xpath=ancestor::*[@data-id][contains(@data-id, "-FieldSectionItemContainer")][1]');
-    const target = (await cell.count()) ? cell : value.nth(i);
-    await target.screenshot({ path: path.join(shotsDir, `form-cell-${i + 1}.png`) });
+  if (n > 0) {
+    const section = page.locator('section').filter({ has: value.first() }).last();
+    if (await section.count()) {
+      const f = path.join(shotsDir, 'form-section.png');
+      await section.screenshot({ path: f });
+      out.shots.push(f);
+    }
+    for (let i = 0; i < n; i++) {
+      const c = fieldContainer(value.nth(i));
+      const f = path.join(shotsDir, `form-cell-${i + 1}.png`);
+      await ((await c.count()) ? c : value.nth(i)).screenshot({ path: f });
+      out.shots.push(f);
+    }
   }
-  // Stock control for comparison.
-  const stock = page.locator('[data-id="numberofemployees.fieldControl-whole-number-text-input"]').first();
+  const stock = page.locator('input[data-id$="numberofemployees.fieldControl-whole-number-text-input"]').first();
   if (await stock.count()) {
-    const stockCell = stock.locator('xpath=ancestor::*[@data-id][contains(@data-id, "-FieldSectionItemContainer")][1]');
-    await ((await stockCell.count()) ? stockCell : stock).screenshot({ path: path.join(shotsDir, 'form-cell-stock.png') });
-    console.log('stock text:', JSON.stringify(await stock.inputValue()));
+    out.stockText = await stock.inputValue();
+    const c = fieldContainer(stock);
+    const f = path.join(shotsDir, 'form-cell-stock.png');
+    await ((await c.count()) ? c : stock).screenshot({ path: f });
+    out.shots.push(f);
   }
-  console.log('shots in', shotsDir);
-} finally {
-  await ctx.close();
+  return out;
+}
+
+if (process.argv[1] && /shoot-form\.mjs$/.test(process.argv[1])) {
+  const setup = JSON.parse(process.argv[2] ?? process.env.SETUP_JSON ?? '{}');
+  if (!setup.formId || !setup.accountId) throw new Error('need formId and accountId from setup-form.mjs');
+  const { ctx, page } = await openOrg({ headless: true });
+  try { console.log(JSON.stringify(await shootForm(page, setup), null, 2)); } finally { await ctx.close(); }
 }

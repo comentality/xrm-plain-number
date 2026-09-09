@@ -1,7 +1,6 @@
 // Creates (or replaces) an Account main form "Number Format E2E" that shows
 // numberofemployees three ways: stock control, NumberFormat with no separator,
 // NumberFormat with an emoji separator. Then publishes and sets a test value.
-// Prints JSON with the ids the screenshot script needs.
 import { openOrg, webApi } from './browser.mjs';
 
 const FORM_NAME = 'Number Format E2E';
@@ -10,8 +9,7 @@ const TEST_ACCOUNT_NAME = 'Number Format E2E Co';
 const TEST_VALUE = 1234567;
 const EMOJI = process.env.EMOJI ?? '🍕';
 
-const { ctx, page } = await openOrg({ headless: true });
-try {
+export async function setupForm(page) {
   // 1. Registered control name (whatever pac pcf push produced).
   const cc = await webApi(page, 'GET', `customcontrols?$select=name,version&$filter=contains(name,'NumberFormat')`);
   const control = cc.data.value.find((c) => /KK\.NumberFormat$/.test(c.name)) ?? cc.data.value[0];
@@ -23,9 +21,9 @@ try {
   const ctrlId = (n) => `{0e2e5${n}00-aaaa-4bbb-8ccc-0000000000${n}1}`;
   const INT_CLASSID = '{C6D124CA-7EDA-4a60-AEA9-7FB8D318B68F}';
   const TEXT_CLASSID = '{4273EDBD-AC1D-40d3-9FB2-095C621B552D}';
-  const cell = (n, label, controlId, disabled = 'false') =>
+  const cell = (n, label, controlId) =>
     `<cell id="${cellId(n)}" showlabel="true" locklevel="0"><labels><label description="${label}" languagecode="1033" /></labels>` +
-    `<control id="${controlId}" classid="${INT_CLASSID}" datafieldname="numberofemployees" disabled="${disabled}" uniqueid="${controlId}" /></cell>`;
+    `<control id="${controlId}" classid="${INT_CLASSID}" datafieldname="numberofemployees" disabled="false" uniqueid="${controlId}" /></cell>`;
   const desc = (n, mode, sep) =>
     `<controlDescription forControl="${ctrlId(n)}">` +
     `<customControl formFactor="2" name="${ctrlName}"><parameters><value>numberofemployees</value>` +
@@ -81,7 +79,10 @@ try {
     accountId = r.entityId.match(/\(([^)]+)\)/)[1];
   }
 
-  console.log(JSON.stringify({ ctrlName, formId, accountId, value: TEST_VALUE, emoji: EMOJI }));
-} finally {
-  await ctx.close();
+  return { ctrlName, formId, accountId, value: TEST_VALUE, emoji: EMOJI };
+}
+
+if (process.argv[1] && /setup-form\.mjs$/.test(process.argv[1])) {
+  const { ctx, page } = await openOrg({ headless: true });
+  try { console.log(JSON.stringify(await setupForm(page))); } finally { await ctx.close(); }
 }
