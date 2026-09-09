@@ -1,8 +1,22 @@
 # xrm-plain-number
 
-Model-driven app field control that shows and edits a Whole Number without a
-thousands separator. For years: 2024, not 2,024.
+Model-driven app controls that show and edit a Whole Number without a
+thousands separator. For years: 2024, not 2,024. One for forms, one for views.
 **[How to use it](docs/usage.md)**, with screenshots.
+
+## Install
+
+Download the managed solution zip from the latest release and import it into
+your environment (make.powerapps.com, Solutions, Import). Then follow
+[docs/usage.md](docs/usage.md) to put Plain Number on a form column and, if you
+want views too, assign Plain Number Grid to the table.
+
+## Licence
+
+Public domain, under the [CC0 1.0 Universal](LICENSE) dedication. Do what you
+like with it; no attribution required. The repository contains no third-party
+code: the grid customizer's type declarations are our own and follow the
+documented Power Apps grid interface.
 
 ## Goal
 
@@ -49,7 +63,8 @@ commit "Grid customizer: all whole numbers plain" if that rule is wanted back.
 Known limits: one customizer per table; subgrids on forms untested; the plain
 cell's right alignment differs from the stock cell by a few pixels of padding.
 `e2e/shots/grid-backup.json` is the restore source for the demo state in the
-test env; keep it.
+test env; it is local and gitignored, keep it. All e2e scripts need `ORG_URL`
+set to the org, e.g. `https://yourorg.crm.dynamics.com`.
 
 The timing probe for that earlier version is `e2e/probe-timing.mjs`; its numbers
 are in the commit "README: measured cost of the customizer's form query".

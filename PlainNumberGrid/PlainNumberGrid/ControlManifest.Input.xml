@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="KK" constructor="PlainNumberGrid" version="0.2.0" display-name-key="Plain Number Grid" description-key="Grid customizer for the Power Apps grid control. Renders every whole-number cell without a thousands separator." control-type="virtual" >
+  <control namespace="KK" constructor="PlainNumberGrid" version="0.1.0" display-name-key="Plain Number Grid" description-key="Grid customizer for the Power Apps grid control. Renders every whole-number cell without a thousands separator." control-type="virtual" >
     <external-service-usage enabled="false">
     </external-service-usage>
     <property name="EventName" display-name-key="EventName" description-key="Set by the platform" of-type="SingleLine.Text" usage="bound" required="true" />

@@ -1,7 +1,6 @@
 // Fixture for the env e2e: a Whole Number column "Founded" on Account, and an
 // Account main form "Plain Number E2E" that shows it twice, stock control and
-// PlainNumber. Publishes and sets a test value. Also removes the control's
-// earlier name (KK.NumberFormat) if it is still registered.
+// PlainNumber. Publishes and sets a test value.
 import { openOrg, webApi } from './browser.mjs';
 
 const FORM_NAME = 'Plain Number E2E';
@@ -11,12 +10,6 @@ const TEST_ACCOUNT_NAME = 'Plain Number E2E Co';
 const TEST_VALUE = Number(process.env.VALUE ?? 2024);
 
 export async function setupForm(page) {
-  // 0. Old control name from before the rename: drop it if nothing uses it.
-  const old = await webApi(page, 'GET', `customcontrols?$select=name,customcontrolid&$filter=contains(name,'KK.NumberFormat')`);
-  for (const c of old.data.value) {
-    try { await webApi(page, 'DELETE', `customcontrols(${c.customcontrolid})`); } catch (e) { console.warn('old control not deleted:', String(e).slice(0, 200)); }
-  }
-
   // 1. Registered control name.
   const cc = await webApi(page, 'GET', `customcontrols?$select=name,version&$filter=contains(name,'KK.PlainNumber')`);
   const control = cc.data.value[0];

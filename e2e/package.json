@@ -1,6 +1,6 @@
 {
-  "name": "e2e",
-  "version": "1.0.0",
+  "name": "xrm-plain-number-e2e",
+  "version": "0.1.0-dev",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,9 +8,10 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "CC0-1.0",
   "type": "commonjs",
   "devDependencies": {
     "playwright": "^1.63.0"
-  }
+  },
+  "private": true
 }

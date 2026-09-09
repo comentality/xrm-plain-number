@@ -4,7 +4,8 @@ import { chromium } from 'playwright';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const orgUrl = (process.env.ORG_URL ?? 'https://org7a56f694.crm3.dynamics.com').replace(/\/$/, '');
+if (!process.env.ORG_URL) throw new Error('Set ORG_URL to your Dataverse org, e.g. https://yourorg.crm.dynamics.com');
+export const orgUrl = process.env.ORG_URL.replace(/\/$/, '');
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const profileDir = path.join(here, '.auth', 'chromium');
 export const shotsDir = path.join(here, 'shots');
