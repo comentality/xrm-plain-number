@@ -1,5 +1,14 @@
 {
-  "user": "1,234,567",
-  "none": "1234567",
-  "emoji": "1🍕234🍕567"
+  "display": {
+    "text": "2024",
+    "harnessValue": "2024"
+  },
+  "typing": {
+    "text": "1,999",
+    "harnessValue": "2024"
+  },
+  "committed": {
+    "text": "1999",
+    "harnessValue": "1999"
+  }
 }

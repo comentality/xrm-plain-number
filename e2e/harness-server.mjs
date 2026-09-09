@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const controlDir = path.resolve(here, '..', 'NumberFormat');
+const controlDir = path.resolve(here, '..', 'PlainNumber');
 const require = createRequire(path.join(controlDir, 'package.json'));
 const bs = require('browser-sync').create();
 const harnessDir = path.dirname(require.resolve('pcf-start/package.json'));
@@ -17,7 +17,7 @@ bs.init({
   notify: false,
   port,
   server: {
-    baseDir: path.join(controlDir, 'out', 'controls', 'NumberFormat'),
+    baseDir: path.join(controlDir, 'out', 'controls', 'PlainNumber'),
     routes: { '/': harnessDir },
   },
   ui: false,
