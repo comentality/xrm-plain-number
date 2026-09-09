@@ -11,6 +11,39 @@ import * as React from "react";
  * forms render without a thousands separator; every other cell falls back to
  * the stock renderer.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const entityOf = (context: ComponentFramework.Context<IInputs>): string | undefined => (context.mode as any)?.contextInfo?.entityTypeName as string | undefined;
+
+interface ICellProps {
+  columns: PlainColumns;
+  entity?: string;
+  column?: string;
+  value: unknown;
+  formatted?: string;
+  right?: boolean;
+}
+
+/**
+ * Used only while the column list is still loading on the very first grid of
+ * a session: shows the platform's formatted text, then repaints itself plain
+ * if the column turns out to be one of ours.
+ */
+const PendingCell: React.FC<ICellProps> = ({ columns, entity, column, value, formatted, right }) => {
+  const [ready, setReady] = React.useState(columns.ready);
+  React.useEffect(() => {
+    if (ready) return;
+    let alive = true;
+    void columns.whenReady().then(() => { if (alive) setReady(true); return undefined; });
+    return () => { alive = false; };
+  }, [columns, ready]);
+  const plain = ready && columns.has(entity, column);
+  return React.createElement(
+    "span",
+    { "data-testid": plain ? "plain-number-cell" : undefined, style: { display: "block", textAlign: right ? "right" : "left" } },
+    plain ? toText(value) : (formatted ?? toText(value)),
+  );
+};
+
 export class PlainNumberGrid implements ComponentFramework.ReactControl<IInputs, IOutputs> {
   public init(context: ComponentFramework.Context<IInputs>): void {
     const eventName = context.parameters.EventName.raw;
@@ -18,19 +51,23 @@ export class PlainNumberGrid implements ComponentFramework.ReactControl<IInputs,
 
     const columns = new PlainColumns(context.webAPI);
     void columns.refresh();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const entity = (): string | undefined => (context.mode as any)?.contextInfo?.entityTypeName as string | undefined;
 
     const customizer: PAOneGridCustomizer = {
       cellRendererOverrides: {
         Integer: (props: CellRendererProps, params: GetRendererParams) => {
-          const col = params.colDefs[params.columnIndex]?.name;
-          if (!columns.has(entity(), col)) return null;
-          return React.createElement(
-            "span",
-            { "data-testid": "plain-number-cell", style: { display: "block", textAlign: props.isRightAligned ? "right" : "left" } },
-            toText(props.value),
-          );
+          const column = params.colDefs[params.columnIndex]?.name;
+          const entity = entityOf(context);
+          if (columns.ready) {
+            if (!columns.has(entity, column)) return null; // stock renderer
+            return React.createElement(
+              "span",
+              { "data-testid": "plain-number-cell", style: { display: "block", textAlign: props.isRightAligned ? "right" : "left" } },
+              toText(props.value),
+            );
+          }
+          return React.createElement(PendingCell, {
+            columns, entity, column, value: props.value, formatted: props.formattedValue, right: props.isRightAligned,
+          });
         },
       },
     };

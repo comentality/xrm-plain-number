@@ -51,20 +51,42 @@ After the push the control appears in the environment as
 The column keeps its type, its min and max, and its business rules. Only the
 rendering changes.
 
-## Views
+## 3. Views: Plain Number Grid
 
-Not covered by this control. Dataverse views cannot carry a field control on a
-column: the server rejects it ("bound to an attribute in non-existent entity"),
-so in a view the column still renders with the user's digit grouping. A
-view-side answer needs a grid customizer control; see the root README.
+A view cannot carry a field control on a column, so the same package ships a
+second control, **Plain Number Grid**, a customizer for the Power Apps grid
+control. It has no settings. It renders plain exactly the whole-number columns
+that carry Plain Number on one of the table's main forms, so the form is the one
+place where you decide.
+
+![Founded column shows 2024 in the view](img/grid-row.png)
+
+To turn it on for a table:
+
+1. Open the classic solution explorer (make.powerapps.com, Solutions, your
+   solution, the table, then **Switch to classic** if needed).
+2. On the table, open the **Controls** tab.
+3. **Add Control**, choose **Power Apps grid control**, and select it for Web,
+   Phone and Tablet.
+4. In its properties, set **Customizer control** to
+   `<prefix>_KK.PlainNumberGrid`.
+5. Save and publish.
+
+Every view and subgrid of that table now shows Plain Number columns without a
+separator. Other whole-number columns on the table keep the user's format.
+Sorting and filtering are untouched; only the rendered text changes.
+
+Only one customizer can be assigned per table. If the table already has one,
+the two would have to be merged; see the root README.
 
 ## Build from source
 
 ```powershell
-cd PlainNumber
+cd PlainNumber          # the form control; same for PlainNumberGrid
 npm install
 npm run build          # out/controls/PlainNumber
 npm start              # PCF test harness in a browser
+pac pcf push --publisher-prefix <your-prefix>
 ```
 
 `e2e/` holds Playwright scripts that host the harness headlessly and take the

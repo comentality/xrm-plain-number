@@ -17,8 +17,15 @@ Started as a per-column "configure your own separator" control; refocused on
 
 ## What is here
 
-- `PlainNumber/`: the PCF (`KK.PlainNumber`, virtual, React 16 + Fluent 9.46.2),
-  bound to `Whole.None`. Registered in the test env as `cmtl_KK.PlainNumber`.
+- `PlainNumber/`: the form control (`KK.PlainNumber`, virtual, React 16 +
+  Fluent 9.46.2), bound to `Whole.None`, editable, no inputs. Registered in the
+  test env as `cmtl_KK.PlainNumber`.
+- `PlainNumberGrid/`: the view side (`KK.PlainNumberGrid`), a Power Apps grid
+  customizer. On init it queries main forms whose XML contains `KK.PlainNumber`,
+  maps table to columns, caches the map in sessionStorage, and overrides the
+  `Integer` cell renderer for those columns only. Assigned per table through the
+  Power Apps grid control's Customizer control property. Registered as
+  `cmtl_KK.PlainNumberGrid`.
 - `e2e/`: Playwright scripts. `harness-server.mjs` + `shoot-harness.mjs`
   screenshot the control in the PCF test harness. `run.mjs` waits for a sign-in
   in a headed browser, then creates a `cmtl_founded` column on Account, an
