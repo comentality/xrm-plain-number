@@ -26,7 +26,9 @@ digits at all is ignored and the previous value comes back.
 
 ## 1. Get it into your environment
 
-Import the solution zip from a release, or build and push from source:
+Import the solution zip from a release, vendor the two files per control into
+your own solution (see [VENDORING.md](../VENDORING.md)), or build and push
+from source:
 
 ```powershell
 cd PlainNumber

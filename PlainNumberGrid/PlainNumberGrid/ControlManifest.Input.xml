@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
+  <!-- Vendoring: change namespace and display-name-key below if you want your own; nothing else references them. -->
   <control namespace="KK" constructor="PlainNumberGrid" version="0.1.0" display-name-key="Plain Number Grid" description-key="Grid customizer for the Power Apps grid control. Renders every whole-number cell without a thousands separator." control-type="virtual" >
     <external-service-usage enabled="false">
     </external-service-usage>

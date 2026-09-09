@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
+  <!-- Vendoring: change namespace and display-name-key below if you want your own; nothing else references them. -->
   <control namespace="KK" constructor="PlainNumber" version="0.1.0" display-name-key="Plain Number" description-key="Shows and edits a whole number without a thousands separator. Made for years: 2024, not 2,024." control-type="virtual" >
     <external-service-usage enabled="false">
     </external-service-usage>

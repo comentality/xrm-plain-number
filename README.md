@@ -11,12 +11,25 @@ your environment (make.powerapps.com, Solutions, Import). Then follow
 [docs/usage.md](docs/usage.md) to put Plain Number on a form column and, if you
 want views too, assign Plain Number Grid to the table.
 
+## Vendor it
+
+Prefer the code in your own solution instead of a separate managed one? Each
+control is two files, and the code is public domain, so copy them and forget
+where they came from:
+
+```
+npx degit comentality/xrm-plain-number/PlainNumber/PlainNumber           PlainNumber/PlainNumber
+npx degit comentality/xrm-plain-number/PlainNumberGrid/PlainNumberGrid   PlainNumberGrid/PlainNumberGrid
+```
+
+Then [VENDORING.md](VENDORING.md): generate the project with `pac pcf init`,
+drop the files in, pin Fluent 9.46.2, build, add to your solution.
+
 ## Licence
 
 Public domain, under the [CC0 1.0 Universal](LICENSE) dedication. Do what you
-like with it; no attribution required. The repository contains no third-party
-code: the grid customizer's type declarations are our own and follow the
-documented Power Apps grid interface.
+like with it; no attribution required, no notice to carry. The repository
+contains no third-party code.
 
 ## Goal
 
